@@ -1,4 +1,4 @@
-QT += widgets network
+QT += widgets network  testlib
 
 TARGET = client
 TEMPLATE = app

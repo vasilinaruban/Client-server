@@ -1,0 +1,3 @@
+/home/vasilina/Client-server/client/build/CMakeFiles/ClientTest.dir
+/home/vasilina/Client-server/client/build/CMakeFiles/edit_cache.dir
+/home/vasilina/Client-server/client/build/CMakeFiles/rebuild_cache.dir

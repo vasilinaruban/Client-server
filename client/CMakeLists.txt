@@ -1,17 +1,19 @@
-cmake_minimum_required(VERSION 3.14)
-project(ChatClient LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.5)
 
-set(CMAKE_CXX_STANDARD 17)
+project(ClientTest LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt5 COMPONENTS Widgets Network REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Core Widgets Test Network)
 
-add_executable(client
-    main.cpp
+add_executable(ClientTest
     client.cpp
-    encryption/hamming.cpp
+    client.h
+    test_client.cpp
+    test_client.h
+    ui_client.h
 )
 
-target_link_libraries(client Qt5::Widgets Qt5::Network)
+target_link_libraries(ClientTest Qt5::Core Qt5::Widgets Qt5::Test Qt5::Network)
 
-add_subdirectory(tests)
