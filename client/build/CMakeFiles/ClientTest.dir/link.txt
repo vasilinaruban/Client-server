@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/ClientTest.dir/client.cpp.o CMakeFiles/ClientTest.dir/test_client.cpp.o -o ClientTest  /usr/lib/x86_64-linux-gnu/libQt5Widgets.so.5.15.3 /usr/lib/x86_64-linux-gnu/libQt5Test.so.5.15.3 /usr/lib/x86_64-linux-gnu/libQt5Network.so.5.15.3 /usr/lib/x86_64-linux-gnu/libQt5Gui.so.5.15.3 /usr/lib/x86_64-linux-gnu/libQt5Core.so.5.15.3 
