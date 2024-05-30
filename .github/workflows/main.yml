@@ -41,15 +41,16 @@ jobs:
           cd build
           qmake ../client/client.pro
           make
-
       - name: Build Tests
         run: |
           mkdir -p build_test
           cd build_test
-          qmake ../client/test_client.pro
+          qmake ../test_client.pro
           make
 
       - name: Run Tests
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: |
           cd build_test
           ./ClientTest
