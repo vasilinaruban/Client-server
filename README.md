@@ -3,7 +3,7 @@
 
 ## Tests
 
-To run the test run the following commands:
+To run the test, run the following commands:
 
 `cd client`
 
