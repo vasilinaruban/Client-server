@@ -45,7 +45,7 @@ jobs:
         run: |
           mkdir -p build_test
           cd build_test
-          qmake ../test_client.pro
+          qmake ../client/test_client.pro
           make
 
       - name: Run Tests
