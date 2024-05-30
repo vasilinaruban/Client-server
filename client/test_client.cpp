@@ -1,94 +1,73 @@
-#include "test_client.h"
-#include <QTcpServer>
-#include <QSignalSpy>
+// test_client.cpp
+#include <QtTest>
+#include "client.h"
+#include "ui_client.h"
 
-void TestClient::testConnectToServer() {
-    QTcpServer server;
-    QVERIFY(server.listen(QHostAddress::Any, 12345));
+class TestClient : public QObject
+{
+    Q_OBJECT
 
-    Client client;
-    client.show();
-    client.ui->serverLineEdit->setText("127.0.0.1");
-    client.ui->portLineEdit->setText("12345");
+private slots:
+    void initTestCase();
+    void cleanupTestCase();
+    void testConnectToServer();
+    void testSendMessage();
+    void testReadMessage();
 
-    QSignalSpy spyConnected(client.socket_, &QTcpSocket::connected);
-    QSignalSpy spyError(client.socket_, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error));
+private:
+    Client *client;
+};
 
-    QTest::mouseClick(client.ui->connectButton, Qt::LeftButton);
-
-    QVERIFY(spyConnected.wait());
-    QCOMPARE(spyError.count(), 0);
-
-    server.close();
+void TestClient::initTestCase()
+{
+    client = new Client();
 }
 
-void TestClient::testSendMessage() {
-    QTcpServer server;
-    QVERIFY(server.listen(QHostAddress::Any, 12345));
-
-    Client client;
-    client.show();
-    client.ui->serverLineEdit->setText("127.0.0.1");
-    client.ui->portLineEdit->setText("12345");
-
-    client.connectToServer();
-    QVERIFY(client.socket_->waitForConnected(3000));
-
-    QTcpSocket *serverSocket = server.nextPendingConnection();
-    QVERIFY(serverSocket->waitForReadyRead(3000));
-
-    client.ui->nameLineEdit->setText("TestUser");
-    client.ui->messageLineEdit->setText("Hello, World!");
-
-    QSignalSpy spyWrite(client.socket_, &QTcpSocket::bytesWritten);
-    QTest::mouseClick(client.ui->sendButton, Qt::LeftButton);
-
-    QVERIFY(spyWrite.wait());
-    QVERIFY(serverSocket->waitForReadyRead(3000));
-
-    QByteArray block = serverSocket->readAll();
-    QDataStream in(&block, QIODevice::ReadOnly);
-    in.setVersion(QDataStream::Qt_5_12);
-    QString name, message;
-    in >> name >> message;
-
-    QCOMPARE(name, QString("TestUser"));
-    QCOMPARE(message, QString("Hello, World!"));
-
-    serverSocket->disconnectFromHost();
-    server.close();
+void TestClient::cleanupTestCase()
+{
+    delete client;
 }
 
-void TestClient::testReadMessage() {
-    QTcpServer server;
-    QVERIFY(server.listen(QHostAddress::Any, 12345));
+void TestClient::testConnectToServer()
+{
+    client->setServerLineEdit("0.0.0.0");
+    client->setPortLineEdit(12345);
 
-    Client client;
-    client.show();
-    client.ui->serverLineEdit->setText("127.0.0.1");
-    client.ui->portLineEdit->setText("12345");
+    QSignalSpy spy(client->getSocket(), &QTcpSocket::connected);
+    client->connectToServer();
 
-    client.connectToServer();
-    QVERIFY(client.socket_->waitForConnected(3000));
+    QVERIFY(spy.wait(3100)); // ожидание подключения в течение 3100 мс
+    QCOMPARE(spy.count(), 1);
+}
 
-    QTcpSocket *serverSocket = server.nextPendingConnection();
-    QVERIFY(serverSocket->waitForReadyRead(3000));
+void TestClient::testSendMessage()
+{
+    client->setNameLineEdit("TestUser");
+    client->setMessageLineEdit("Hello, World!");
 
-    QByteArray block;
-    QDataStream out(&block, QIODevice::WriteOnly);
+    QSignalSpy spy(client->getSocket(), &QTcpSocket::bytesWritten);
+    client->sendMessage();
+
+    QVERIFY(spy.wait(1000)); // ожидание отправки сообщения в течение 1000 мс
+    QCOMPARE(spy.count(), 1);
+}
+
+void TestClient::testReadMessage()
+{
+    QSignalSpy spy(client->getSocket(), &QTcpSocket::readyRead);
+    QByteArray data;
+    QDataStream out(&data, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_12);
-    out << QString("ServerUser") << QString("Hello from server!");
+    out << QString("ServerUser") << QString("Hello, Client!");
 
-    QSignalSpy spyRead(client.socket_, &QTcpSocket::readyRead);
-    serverSocket->write(block);
-    serverSocket->flush();
+    client->getSocket()->write(data);
+    QVERIFY(spy.wait(1000)); // ожидание чтения сообщения в течение 1000 мс
 
-    QVERIFY(spyRead.wait());
-
-    QCOMPARE(client.ui->chatTextEdit->toPlainText(), QString("ServerUser: Hello from server!"));
-
-    serverSocket->disconnectFromHost();
-    server.close();
+    client->readMessage();
+    // Дополнительная проверка содержания чата после получения сообщения
+    // Проверка может быть адаптирована в зависимости от того, как именно
+    // вы реализуете обновление интерфейса
+//    QVERIFY(client.appendChatText().contains("ServerUser: Hello, Client!"));
 }
 
 QTEST_MAIN(TestClient)

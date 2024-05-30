@@ -5,7 +5,8 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
            client.cpp \
-           encryption/hamming.cpp
+           encryption/hamming.cpp \
+           
 
 HEADERS += client.h \
            encryption/hamming.h
